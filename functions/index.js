@@ -86,6 +86,9 @@ exports.admin = functions.https.onRequest((req, res) => {
   // Get admin message to send back to slack
   const message = selectMessage();
 
+  // Set message to be public in slack
+  message.response_type = 'in_channel'
+
   // Send message to slack
   res.send(message);
 });
