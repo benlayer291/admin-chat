@@ -1,3 +1,4 @@
+const axios = require('axios');
 const functions = require('firebase-functions');
 
 const messages = [
@@ -68,12 +69,25 @@ function getRandomInt(min, max) {
   return  randomInt
 }
 
+// Select message from messages array
 function selectMessage () {
   const messagesArray = messages;
   const messagesLength = messagesArray.length;
   const randomIndex = getRandomInt(0, messagesLength - 1);
   const message = messagesArray[randomIndex];
   return message;
+}
+
+// Send message as POST request
+function sendMessage(url, data) {
+  return axios({
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    data,
+    url
+  }).catch(function (error) {
+    console.error(error);
+  });
 }
 
 exports.admin = functions.https.onRequest((req, res) => {
@@ -89,6 +103,9 @@ exports.admin = functions.https.onRequest((req, res) => {
   // Set message to be public in slack
   message.response_type = 'in_channel'
 
-  // Send message to slack
-  res.send(message);
+  // Send delayed message to Slack
+  sendMessage(req.body.response_url, message)
+
+  // Send 200 status to Slack
+  return res.status(200).end();
 });
